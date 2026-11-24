@@ -1,0 +1,14 @@
+# Generado al montar (sale de la cinta del usuario: no se publica)
+desensamblado/trabajo/
+desensamblado/salida/
+rom/*.rom
+rom/*.bin
+rom/plano.rle
+rom/variante.inc
+rom/tabla.inc
+*.cas
+*.tsx
+*.dsk
+*.vram
+vram_*.bin
+__pycache__/

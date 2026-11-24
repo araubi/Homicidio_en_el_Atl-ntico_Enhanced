@@ -1,0 +1,17 @@
+Desensamblado y documentacion de "Homicidio en el Atlantico Enhanced"
+Copyright (c) 2026 araubi
+
+Se publican bajo la licencia Creative Commons Atribucion-NoComercial-CompartirIgual 4.0
+Internacional (CC BY-NC-SA 4.0): https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es
+Texto legal completo: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.es
+
+Cubre:
+- el desensamblado comentado de desensamblado/ (ficheros .asm, .inc y personas.json);
+- la documentacion (carpeta docs/ y README).
+
+No cubre:
+- el juego original Homicidio en el Atlantico / Meurtres sur l'Atlantique (codigo, programas
+  BASIC, graficos, textos, testimonios, diseno y marcas), de Cobra Soft e Infogrames, que sigue
+  siendo de sus titulares. Sus datos no estan en este repositorio: los saca build.py de la
+  cinta de cada usuario;
+- los ficheros de releases/.

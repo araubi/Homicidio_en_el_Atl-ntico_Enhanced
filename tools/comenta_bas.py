@@ -1,0 +1,110 @@
+# Genera listados BASIC comentados (castellano) a partir de los .asc originales
+import sys,os,re
+C_MSA3={
+10:'=== MSA3: programa principal de la investigacion (cinta, cara A) ===',
+20:'Reserva 400 bytes de cadenas y protege la memoria desde B91Fh (testimonios en B91F, rutinas MSA en BD00). Carga MSA.',
+26:'POKE FCAB,255 = bloquea mayusculas (CAPS). USR1 = 0156h (KILBUF, vacia el bufer del teclado).',
+30:'Cualquier error (sobre todo de cinta) va a 1690 -> 3000 "ATENCION ERROR DE CASSETTE".',
+50:'USR(6): busca la RAM de la pagina 1 (alli dejo TRIMMS los dibujos de las salas).',
+61:'USR(1): borra la cara; recuadros de la cara (izquierda) y de la sala (derecha).',
+130:'NU=DE00h (parametros de las USR) y VE=DE02h: 51 banderas (VE+1..VE+40 = se puede interrogar a la persona n).',
+135:'Todas las banderas a 1 salvo las de la linea 190 (personas que hay que "desbloquear" y estados 41, 43, 50).',
+190:'Banderas iniciales a 0: 3,6,11,12,14,18,24,31,33,34,35,36,37,38,40 (personas), 41 (sin uso), 43 (ascensor arreglado), 50 (palabra clave SESAMO). La 42 empieza a 1: Turning todavia no se puede liberar.',
+200:'Pregunta si se carga una partida (fichero ETAT de cinta). H (reloj) se guarda dividido por 3 en VE+49.',
+210:'HM=700: el reloj H sube 0,001 cada vuelta de espera de tecla (unas 60 por segundo). Posicion inicial: puente D (Y1=10), columna 25 (sala de baile). SPRITE 0 = el marcador del plano.',
+225:'Puente actual: letra = CHR$(78-Y1) (Y1=13 -> A ... Y1=1 -> M).',
+230:'Bucle principal: espera una tecla.',
+250:'Flecha arriba/abajo: solo en la escalera (columna 64) y entre los puentes E y J.',
+270:'D = pasa las 40 caras (lista de personajes).',
+280:'V = ver la sala donde estas (nombre y dibujo).',
+290:'* o $ = llamar al ascensor (solo en las columnas 31 y 76).',
+300:'M = mirar quien hay (cara del ocupante).',
+310:'P = preguntar / interrogar (carga el testimonio de la cara B).',
+320:'I = investigar / registrar la sala o a la persona.',
+330:'£ = grabar la investigacion en cinta (ETAT: banderas VE..VE+50).',
+340:'Flechas izquierda/derecha: solo si el punto del plano es blanco (color 15), es decir, por pasillo.',
+360:'E en el puente J columna 88 (sollados) cuando VE+42=0: se libera a Turning (VE+37=1).',
+370:'Cuando el reloj H llega a HM (700) y Turning sigue encerrado: aviso "REVISAR LOS SOLLADOS" y VE+42=0 (ya se le puede liberar).',
+400:'Rutina D: pasa las 40 caras hasta que se pulse una tecla.',
+430:'Borra los recuadros de cara, sala y texto.',
+460:'Espera de tecla con avance del reloj (sin el sonido).',
+510:'Espera de tecla con avance del reloj; en el puente J, cerca de la columna 88, a veces suenan golpes (Turning en la caja) si VE+42=0.',
+550:'=== ASCENSOR === Solo en las columnas 31 (izquierda) y 76 (derecha).',
+580:'Espera al azar a que llegue la cabina.',
+630:'Se elige el puente con una letra A..M.',
+650:'Ascensor derecho: 10 % de veces, bajando, para un puente mas abajo.',
+690:'Pulsando I durante el viaje se registra la cabina: tarjeta ALTMAN y casquillo 7,65 (izquierdo) o colilla de Marlboro (derecho).',
+720:'Averia: solo en el ascensor derecho, con H >= HM/2 (350) y mientras no se haya arreglado (VE+43=0).',
+730:"Linea anulada con ' : el autor pensaba atar la averia a un puente concreto.",
+760:'Hay que pulsar A (averia).',
+771:'AUTODIAGNOSTICO: "** *   * **   * " = 1101000101100010 en binario = 53602.',
+800:'Codigo de funcionamiento: se teclean 5 cifras (53602); O=536020 porque cada cifra se multiplica por 10^C con C=5..1.',
+870:'=== MIRAR === USR(2) sala y USR(3) ocupante. En las salas con dibujo 9 (prohibidas) no se ve a nadie sin la palabra clave.',
+890:'Camarotes sin ocupante (sus duenos estan en otra parte): A26, J25, H72, F54, G72.',
+910:'Turning (37) no aparece hasta liberarlo; Kempfer (22, el cadaver del frigorifico) no aparece sin la palabra clave.',
+950:'=== VER LA SALA === nombre (DATA 1010-1070) y dibujo (USR 4). En el fotografo se pinta encima la grieta del escaparate.',
+1010:'Nombres de las salas, por el numero de tipo que devuelve USR(2).',
+1090:'=== INVESTIGAR / REGISTRAR ===',
+1100:'El almacen frigorifico y las salas prohibidas ("*#") piden la palabra clave (VE+50).',
+1110:'Persona 99: registro especial sin persona (tiro al blanco, camarote H72).',
+1140:'Si hay persona con codigo de registro, va a la lista ON ... GOTO; si no, "NO HAY NADA".',
+1150:'Si NU>=41 es un texto de MSA (direccion NU*256+NU+1) y se imprime con 11000.',
+1220:'Registros especiales por codigo 1..13.',
+1230:'Codigo 1 (tiro al blanco E95): papel marron -> respuesta BRAILLE (7 letras) -> VE+3 (el ciego).',
+1240:'Lee exactamente 7 teclas (sin RETURN, sin borrar).',
+1270:'Codigo 2 (Celestina, H73): cuaderno -> VE+24 (su novio).',
+1280:'Codigo 3 (vigilante, J80): mensaje firmado M -> VE+12 (Marthe Granet) y VE+23.',
+1290:'Codigo 4 (Pellton, H71): revolver en la funda -> VE+18 (Pellton).',
+1300:'Codigo 5 (Mimile, H90): periodico (recortado para la carta anonima), cafe, fajo de billetes.',
+1310:'Codigo 6 (von Druben, G24): foto de un puerto y tarjeta.',
+1320:'Codigo 7 (frigorifico M27): A = autopsia, F = registrar el cuerpo.',
+1340:'F: papelito con nombres femeninos y tarjeta -> VE+31 (la vecina que oyo el disparo).',
+1350:'A: autopsia (cara del doctor, persona 16).',
+1380:'Codigo 8 (camarote H72, el de Turning): maleta con combinacion de 3 caracteres: ADA (la hija de Lord Byron, autor de Childe Harold).',
+1390:'Fallo de la traduccion: si la combinacion es mala tambien pone "CORRECTO..." (falta el NO).',
+1410:'Codigo 9 (sociologo, F27): cartucho y petaca en el forro.',
+1420:'Codigo 10 (Altman, J26): se queja; pulsando A se le registra igual: pedazo de cuerda.',
+1450:'Codigo 11 (fotografo, E65): mensaje de letras recortadas -> VE+40.',
+1460:'Codigo 12 (sala de maquinas, M59): 12 botellas de whisky -> VE+38 (el capitan del whisky).',
+1470:'Codigo 13 (sollados J88): la caja de Turning: material de salvamento.',
+1500:'=== INTERROGAR ===',
+1520:'Si VE+persona=0: "ES DEMASIADO TEMPRANO".',
+1530:'Los muertos (13 y 22) no hablan.',
+1540:'El testimonio se carga en B91Fh; B91F guarda cual esta cargado para no volver a leer la cinta.',
+1550:'BLOAD "CAS:TEMn.BIN" (en cinta solo cuentan las 6 primeras letras del nombre).',
+1560:'Texto (bytes > 31) hasta un codigo: codigo de pregunta y bandera que desbloquea.',
+1580:'Codigo 1: pregunta de 7 letras (AQUILES); 2: morse (S/N); 3: palabra clave de 6 letras (SESAMO).',
+1600:'Cura (1): el sucesor de San Pedro es AQUILES -> VE+11 (Celestina).',
+1620:'Comisario (30): palabra clave SESAMO -> VE+50.',
+1640:'Mensaje en morse (radio, 36). Fallo: los espacios repiten la letra anterior y la Ñ de BORGOÑA da "Out of DATA" -> "ATENCION ERROR DE CASSETTE": el mensaje en castellano nunca llega a "BAJO EL NOMBRE DE AL...".',
+1670:'Alfabeto morse A..Z.',
+1680:'El mensaje (en frances iba sin espacios: SURBOURGOGNE, SOUSLE, NOMDE).',
+3000:'Gestor de errores: "ATENCION ERROR DE CASSETTE" y vuelta al bucle (o sigue si fallo la carga de ETAT).',
+8000:'Imprime el testimonio letra a letra en la ventana de texto; ESPACIO pasa de pagina.',
+11000:'Imprime un texto de registro de MSA letra a letra.',
+}
+C_TEST={5:'=== TEST de evaluacion (ultimo fichero de la cara A): RUN"CAS:TEST" ===',
+12:'USR1 = KILBUF.',13:'Mayusculas.',
+55:'Para cada pregunta: texto, longitud L y suma de los codigos ASCII CHEC de la respuesta (asi no se ve la respuesta en el listado).',
+130:'Solo compara la SUMA: cualquier anagrama (o cualquier texto con la misma suma) vale.',
+140:'Si la longitud coincide pero no la suma: "HAY ALGUNOS CARACTERES CORRECTOS".',
+190:'Resultado.',
+200:'Fallo: R/2 con 15 preguntas da como mucho 7,5 -> ON 7 -> nunca sale el mensaje 8 ("¡MUY BIEN! NO HAY FALTA"). La version alemana lo arregla (IF R=15 THEN GOSUB 320).',
+330:'Respuestas (deducidas por la suma y comprobadas en el juego): LECREUX, SIRIUS, ENIGMA, 13H54, SUBMARINO, COBRA, KEMPFER, CAMAROTE 672, KEMPFER, GRANET, SESAMO, BAUMAN, NORUEGA, ALLISON y dos cifras que sumen 8 (p. ej. 44).',
+490:'Lee una tecla; cada 25 letras salta de linea.'}
+C_MSA1={10:'=== MSA1: cargador (RUN"CAS:") ===',20:'Protege la memoria desde 9000h.',30:'Presentacion (ENTETE, 9000h).',80:'Dibujos de las salas (TRIMMS: los copia a la RAM de la pagina 1). Pide "TRIMMSA" pero en cinta solo cuentan 6 letras: TRIMMS.',100:'Plano del barco.'}
+C_MSA2={10:'=== MSA2: dibuja el plano del barco con LINE y PSET (en disco es BATVER.XXX, una copia de la VRAM) ===',60:'Contorno del barco (DATA 240-270).',130:'Rellena las cubiertas con rayas (DATA 280-300).',200:'Rotulos.',230:'Carga y arranca MSA3.'}
+def comenta(asc,coment,titulo):
+    s=open(asc,'rb').read().decode('cp437').replace('\r\n','\n').strip('\n')
+    out=[titulo,'(comentarios con >>; el listado es el original, sin tocar)','']
+    for l in s.split('\n'):
+        m=re.match(r'\s*(\d+)',l)
+        n=int(m.group(1)) if m else None
+        if n in coment: out.append('   >> '+coment[n])
+        out.append(l)
+    return '\n'.join(out)+'\n'
+if __name__=='__main__':
+    src,dst=sys.argv[1],sys.argv[2]
+    T='Homicidio en el Atlantico (Cobra Soft / Infogrames, MSX, cinta en castellano 1987). '
+    for n,c in (('MSA1',C_MSA1),('MSA2',C_MSA2),('MSA3',C_MSA3),('TEST',C_TEST)):
+        open(os.path.join(dst,n+'_comentado.txt'),'w').write(comenta(os.path.join(src,n+'.asc'),c,T+n))
