@@ -6,6 +6,15 @@ Versión mejorada de la cinta española de **Homicidio en el Atlántico** (*Meur
 
 La ROM está en [`releases/`](releases/) y en la Release v1.0. Funciona en cualquier MSX con 64 KB de RAM (mapper ASCII16).
 
+## Capturas
+
+| | |
+|---|---|
+| ![Título con JUEGO o TEST](docs/capturas/titulo.png) | ![Plano del barco con la columna](docs/capturas/plano.png) |
+| Título, con «¿JUEGO O TEST?» | El plano ya dibujado y la columna bajo el puente |
+| ![Testimonio](docs/capturas/testimonio.png) | ![Test perfecto](docs/capturas/test.png) |
+| Un testimonio, al momento | El test perfecto con su mensaje |
+
 ## Qué tiene de nuevo
 
 **Arreglos sobre la cinta**
