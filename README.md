@@ -1,6 +1,6 @@
 # Homicidio en el Atlántico Enhanced (MSX)
 
-<p align="center"><img src="docs/portada.png" alt="Portada de Homicidio en el Atlántico Enhanced" width="420"></p>
+<p align="center"><img src="docs/portada.jpg" alt="Portada de Homicidio en el Atlántico Enhanced" width="420"></p>
 
 Versión mejorada de la cinta española de **Homicidio en el Atlántico** (*Meurtres sur l'Atlantique*, Cobra Soft / Infogrames, 1987) para MSX: un cartucho de 64 KB con el juego entero dentro (los 40 testimonios incluidos, sin cara B), con los fallos de la cinta arreglados y con las partes lentas del BASIC pasadas a ensamblador.
 
