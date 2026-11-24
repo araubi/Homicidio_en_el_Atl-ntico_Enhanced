@@ -45,7 +45,7 @@ El reloj interno no cambia: Turning sigue apareciendo tras unas 3 h 15 min de es
 
 ## Documentación
 
-- [docs/SOLUCION.md](docs/SOLUCION.md): solución completa, con las respuestas del test.
+- [docs/SOLUCION.md](docs/SOLUCION.md) y [docs/SOLUCION.pdf](docs/SOLUCION.pdf): solución completa, con las respuestas del test (el PDF lleva además el mapa del barco).
 - [docs/MEJORAS.md](docs/MEJORAS.md): qué se ha cambiado y cómo está hecho el cartucho.
 - [docs/ANALISIS.md](docs/ANALISIS.md): cómo está hecho el juego (ficheros, memoria, rutinas USR, órdenes, reloj).
 - [docs/VERSIONES.md](docs/VERSIONES.md): las versiones de MSX (cinta española, disco francés y disco alemán) comparadas.
